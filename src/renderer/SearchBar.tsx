@@ -8,7 +8,7 @@ function SearchBar({onSearch}) {
 
   function handleSubmit(event) {
     event.preventDefault(); // Empêche le rechargement de la page
-    onSearch(input);
+    onSearch(input); // Appelle la fonction de recherche avec la requête
   }
 
   return (
@@ -16,6 +16,9 @@ function SearchBar({onSearch}) {
       <Box sx={{display: 'flex', alignItems: 'flex-end'}}>
         <AlbumIcon sx={{color: 'white', mr: 1, my: 0.5, s: 10, fontSize: 50}}/>
         <TextField
+          sx={{color: 'white'}}
+          // error={false}
+          // helperText="Incorrect entry."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           required

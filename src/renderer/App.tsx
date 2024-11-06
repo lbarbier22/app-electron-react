@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {MemoryRouter as Router, Routes, Route} from 'react-router-dom';
 import icon from '../../assets/icon.png';
 import './App.css';
-import SearchBar from './components/searchBar/SearchBar';
-import AlbumsList from './components/albumList/albumList';
-import TracksList from './components/trackList/trackList';
-import {Album} from "../domain/models/album";
-import {fetchAlbums} from "../domain/usecases/fetchAlbum";
-import {Track} from "../domain/models/track";
-import {fetchTracks} from "../domain/usecases/fetchTrack";
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Divider from '@mui/material/Divider';
+import SearchBar from "./SearchBar";
 
 function Hello() {
   const [resetCounter, setResetCounter] = useState(false);
@@ -29,14 +28,9 @@ function Hello() {
     handleSearch("THIS IT?");
   }, []);
 
-  async function handleSearch(query: string) {
-    const albumResults = fetchAlbums(query);
-    setAlbums(await albumResults);
-  }
-
-  async function handleAlbumClick(albumId: string) {
-    const trackResults = fetchTracks(albumId);
-    setTracks(await trackResults);
+  function handleReset(): void {
+    setResetCounter(!resetCounter);
+    console.log(`Counter reset`);
   }
 
   // Nouveau: fonction de recherche d'artiste
@@ -56,12 +50,21 @@ function Hello() {
   return (
     <div>
       <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
+        <img width="200" alt="icon" src={icon}/>
       </div>
       <h1>RateYourFavAlbums</h1>
-      <SearchBar className="search-bar" onSearch={handleSearch} />
-      <AlbumsList albums={albums} onAlbumClick={handleAlbumClick} />
-      <TracksList tracks={tracks} />
+      <SearchBar onSearch={handleSearch}/> {/* Passe handleSearch à SearchBar */}
+      <List className='albums'>
+        {albums.map((album) => (
+          <ListItem key={album.id}>
+            <ListItemAvatar>
+              <img width="100" src={album.images[0].url} alt={album.name}/>
+            </ListItemAvatar>
+            <ListItemText primary={album.name} secondary={album.artists[0].name}/>
+            <Divider sx={{color : 'white' }}/>
+          </ListItem>
+        ))}
+      </List>
     </div>
   );
 }
@@ -115,7 +118,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<Hello/>}/>
       </Routes>
     </Router>
   );
