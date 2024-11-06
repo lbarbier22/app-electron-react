@@ -1,5 +1,5 @@
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {app, BrowserWindow, ipcMain, shell} from 'electron';
 import fetch from 'node-fetch'; // Assurez-vous que node-fetch est installé
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -15,6 +15,7 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+
 let bearerToken = getBearerToken(); // Stockage du bearer token
 
 // @ts-ignore
@@ -114,3 +115,11 @@ app.on('window-all-closed', () => {
 });
 
 app.whenReady().then(createWindow).catch(console.log);
+
+ipcMain.handle('search-albums', async (_, query: string) => {
+  return await searchAlbums(query);
+});
+
+ipcMain.handle('get-album-tracks', async (_, albumId: string) => {
+  return await getAlbumTracks(albumId);
+});
