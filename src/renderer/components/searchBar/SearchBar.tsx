@@ -16,9 +16,6 @@ function SearchBar({onSearch}) {
       <Box sx={{display: 'flex', alignItems: 'flex-end'}}>
         <AlbumIcon sx={{color: 'white', mr: 1, my: 0.5, s: 10, fontSize: 50}}/>
         <TextField
-          sx={{color: 'white'}}
-          // error={false}
-          // helperText="Incorrect entry."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           required
