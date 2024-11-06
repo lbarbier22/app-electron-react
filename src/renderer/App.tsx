@@ -8,6 +8,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Divider from '@mui/material/Divider';
 import SearchBar from "./SearchBar";
+import AlbumIcon from "@mui/icons-material/Album";
 
 function Hello() {
   const [resetCounter, setResetCounter] = useState(false);
@@ -23,9 +24,15 @@ function Hello() {
     fetchBearer();
   }, []);
 
-  function handleReset(): void {
-    setResetCounter(!resetCounter);
-    console.log(`Counter reset`);
+
+  async function handleSearch(query) {
+    const albumResults = await window.electronAPI.ipcRenderer.invoke('search-albums', query);
+    setAlbums(albumResults);
+  }
+
+  async function handleAlbumClick(albumId) {
+    const trackResults = await window.electronAPI.ipcRenderer.invoke('get-album-tracks', albumId);
+    setTracks(trackResults);
   }
 
   // Nouveau: fonction de recherche d'artiste
@@ -60,6 +67,21 @@ function Hello() {
           </ListItem>
         ))}
       </List>
+            <Divider sx={{color: 'white'}}/>
+          </ListItem>
+        ))}
+      </List>
+      <div>
+        <h2>Tracks</h2>
+        <List className="tracks">
+          {tracks.map((track) => (
+            <ListItem key={track.id}>
+              <AlbumIcon sx={{color: 'white', mr: 1, my: 0.5, s: 10, fontSize: 50}}/>
+              <ListItemText primary={track.name} secondary={`${(track.duration_ms / 60000).toFixed(2)} min`}/>
+            </ListItem>
+          ))}
+        </List>
+      </div>
     </div>
   );
 }
