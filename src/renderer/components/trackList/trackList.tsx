@@ -3,16 +3,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import AlbumIcon from '@mui/icons-material/Album';
-
-interface Track {
-  id: string;
-  name: string;
-  duration_ms: number;
-}
-
-interface TracksListProps {
-  tracks: Track[];
-}
+import {Track, TracksListProps} from "../../../domain/models/track";
 
 function TracksList({ tracks }: TracksListProps) {
   if (tracks.length === 0) return null; // Ne pas afficher si aucun album n'a été sélectionné
