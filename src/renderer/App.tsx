@@ -5,24 +5,28 @@ import './App.css';
 import SearchBar from './components/searchBar/SearchBar';
 import AlbumsList from './components/albumList/albumList';
 import TracksList from './components/trackList/trackList';
+import {Album} from "../domain/models/album";
+import {fetchAlbums} from "../domain/usecases/fetchAlbum";
+import {Track} from "../domain/models/track";
+import {fetchTracks} from "../domain/usecases/fetchTrack";
 
 function Hello() {
-  const [tracks, setTracks] = useState([]);
-  const [albums, setAlbums] = useState([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
 
   useEffect(() => {
-    // Appel initial avec le mot-clé "THIS IS"
+    // Appel initial avec le mot-clé "THIS IT?"
     handleSearch("THIS IT?");
   }, []);
 
   async function handleSearch(query: string) {
-    const albumResults = await window.electronAPI.ipcRenderer.invoke('search-albums', query);
-    setAlbums(albumResults);
+    const albumResults = fetchAlbums(query);
+    setAlbums(await albumResults);
   }
 
   async function handleAlbumClick(albumId: string) {
-    const trackResults = await window.electronAPI.ipcRenderer.invoke('get-album-tracks', albumId);
-    setTracks(trackResults);
+    const trackResults = fetchTracks(albumId);
+    setTracks(await trackResults);
   }
 
   return (

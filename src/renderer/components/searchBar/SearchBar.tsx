@@ -8,7 +8,7 @@ function SearchBar({onSearch}) {
 
   function handleSubmit(event) {
     event.preventDefault(); // Empêche le rechargement de la page
-    onSearch(input); // Appelle la fonction de recherche avec la requête
+    onSearch(input);
   }
 
   return (
