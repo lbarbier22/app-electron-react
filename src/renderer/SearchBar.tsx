@@ -1,24 +1,34 @@
-import './SearchBar.css';
-import React from 'react';
-import TextField from '@mui/material/TextField';
-import { Box, styled } from '@mui/material';
-import AlbumIcon from '@mui/icons-material/Album';
+import React, {useState} from 'react';
+import {Box} from "@mui/material";
+import AlbumIcon from "@mui/icons-material/Album";
+import TextField from "@mui/material/TextField";
 
-function SearchBar() {
+function SearchBar({onSearch}) {
+  const [input, setInput] = useState('');
+
+  function handleSubmit(event) {
+    event.preventDefault(); // Empêche le rechargement de la page
+    onSearch(input); // Appelle la fonction de recherche avec la requête
+  }
+
   return (
-    <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-      <AlbumIcon sx={{ color: 'white', mr: 1, my: 0.5, s: 10, fontSize: 50 }} />
-      <TextField
-        sx={{ color: 'white' }}
-        // error={false}
-        // helperText="Incorrect entry."
-        required
-        className="searchBar"
-        label="Search for an album"
-        defaultValue="THIS IT?"
-      />
-    </Box>
-  );
+    <form onSubmit={handleSubmit}>
+      <Box sx={{display: 'flex', alignItems: 'flex-end'}}>
+        <AlbumIcon sx={{color: 'white', mr: 1, my: 0.5, s: 10, fontSize: 50}}/>
+        <TextField
+          sx={{color: 'white'}}
+          // error={false}
+          // helperText="Incorrect entry."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          required
+          className="searchBar"
+          label="Search for an album"
+        />
+      </Box>
+    </form>
+  )
+    ;
 }
 
 export default SearchBar;
