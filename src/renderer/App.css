@@ -70,8 +70,8 @@ a:hover {
   width: 100%;
   max-width: 360px;
   border-radius: 10px;
-  border: 3px solid black;
-  background-color: #2b2b2c;
+  border: 3px solid #ffffff;
+  background-color: rgba(43, 43, 44, 0.49);
   margin-top: 20px !important;
 }
 
@@ -79,8 +79,8 @@ a:hover {
   width: 100%;
   max-width: 360px;
   border-radius: 10px;
-  border: 3px solid black;
-  background-color: #2b2b2c;
+  border: 3px solid #ffffff;
+  background-color: rgba(43, 43, 44, 0.49);
   margin-top: 20px; /* Espace au-dessus de la liste des titres */
 }
 
@@ -115,7 +115,7 @@ a:hover {
 }
 
 .MuiTypography-root {
-  color: white; /* Pour ajuster la couleur du Divider si nécessaire */
+  color: white !important; /* Pour ajuster la couleur du Divider si nécessaire */
 }
 
 .album {
