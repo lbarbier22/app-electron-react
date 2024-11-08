@@ -5,7 +5,6 @@
 body {
   position: relative;
   color: white;
-  height: 100vh;
   background: linear-gradient(
     200.96deg,
     #512afe -29.09%,
@@ -13,10 +12,11 @@ body {
     #7a2c9e 129.35%
   );
   font-family: sans-serif;
-  overflow-y: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
+  max-height: 700vh;
 }
 
 button {
@@ -61,17 +61,60 @@ a:hover {
   margin: 20px 0;
 }
 
-
-
 .css-b7dj7n-MuiList-root {
   margin-top: 30px;
 }
+
 .albums {
   width: 100%;
   max-width: 360px;
   border-radius: 10px;
-  border: 3px solid black;
-  background-color: #2b2b2c;
+  border: 3px solid #ffffff;
+  background-color: rgba(43, 43, 44, 0.49);
+  margin-top: 20px !important;
+}
+
+.tracks {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 10px;
+  border: 3px solid #ffffff;
+  background-color: rgba(43, 43, 44, 0.49);
+  margin-top: 20px; /* Espace au-dessus de la liste des titres */
+}
+
+.tracks .MuiListItem-root {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  padding: 8px;
+}
+
+.tracks .MuiListItemText-root {
+  color: white;
+}
+
+.tracks img {
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.tracks .MuiDivider-root {
+  background-color: white;
+}
+
+/* Espacer l'image de l'album et le texte */
+.MuiListItem-root {
+  display: flex;
+  align-items: center;
+}
+
+.MuiListItemAvatar-root {
+  margin-right: 15px; /* Espace entre l'image et le texte */
+}
+
+.MuiTypography-root {
+  color: white !important; /* Pour ajuster la couleur du Divider si nécessaire */
 }
 
 .album {

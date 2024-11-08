@@ -1,70 +1,52 @@
-import React, {useEffect, useState} from 'react';
-import {MemoryRouter as Router, Routes, Route} from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.png';
 import './App.css';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Divider from '@mui/material/Divider';
-import SearchBar from "./SearchBar";
+import SearchBar from './components/searchBar/SearchBar';
+import AlbumsList from './components/albumList/albumList';
+import TracksList from './components/trackList/trackList';
+import { Album } from '../domain/models/album';
+import { fetchAlbums } from '../domain/usecases/fetchAlbum';
+import { Track } from '../domain/models/track';
+import { fetchTracks } from '../domain/usecases/fetchTrack';
 
 function Hello() {
-  const [resetCounter, setResetCounter] = useState(false);
-  const [bearer, setBearer] = useState('');
-  const [albums, setAlbums] = useState([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function fetchBearer() {
-      const token = await getBearer();
-      setBearer(token);
-    }
-
-    fetchBearer();
+    handleSearch('THIS IT?');
   }, []);
+
+  async function handleSearch(query: string) {
+    const albumResults = fetchAlbums(query);
+    setAlbums(await albumResults);
+  }
+
+  async function handleAlbumClick(albumId: string) {
+    const trackResults = fetchTracks(albumId);
+    setTracks(await trackResults);
+  }
 
   useEffect(() => {
-    // Appel initial avec le mot-clé "THIS IS"
-    handleSearch("THIS IT?");
-  }, []);
-
-  function handleReset(): void {
-    setResetCounter(!resetCounter);
-    console.log(`Counter reset`);
-  }
-
-  // Nouveau: fonction de recherche d'artiste
-  async function handleSearch(query) {
-    if (bearer) {
-      try {
-        const results = await searchAlbums(query, bearer);
-        console.log('results:', results);
-        setAlbums(results.albums.items); // Stocke les albums trouvés
-      } catch (error) {
-        console.error('Search failed:', error);
-      }
+    // Descend au bas dès que les tracks sont chargés et affichés
+    if (tracks.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }
+  }, [tracks]);
 
-  // @ts-ignore
   return (
     <div>
       <div className="Hello">
         <img width="200" alt="icon" src={icon}/>
       </div>
       <h1>RateYourFavAlbums</h1>
-      <SearchBar onSearch={handleSearch}/> {/* Passe handleSearch à SearchBar */}
-      <List className='albums'>
-        {albums.map((album) => (
-          <ListItem key={album.id}>
-            <ListItemAvatar>
-              <img width="100" src={album.images[0].url} alt={album.name}/>
-            </ListItemAvatar>
-            <ListItemText primary={album.name} secondary={album.artists[0].name}/>
-            <Divider sx={{color : 'white' }}/>
-          </ListItem>
-        ))}
-      </List>
+      <SearchBar className="search-bar" onSearch={handleSearch} />
+      <AlbumsList albums={albums} onAlbumClick={handleAlbumClick} />
+      <div ref={bottomRef}>
+        <TracksList tracks={tracks} /> {/* Composant TracksList */}
+      </div>
     </div>
   );
 }
