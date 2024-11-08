@@ -15,7 +15,7 @@ function TracksList({ tracks }: TracksListProps) {
   const handleRating = (trackId: string, trackName: string, rating: number) => {
     setRatings((prevRatings) => ({
       ...prevRatings,
-      [trackId]: { name: trackName, rating }, // Stocke le nom et la note
+      [trackId]: { name: trackName, rating },
     }));
   };
 
@@ -40,7 +40,6 @@ function TracksList({ tracks }: TracksListProps) {
   }, [tracks]);
 
   useEffect(() => {
-    // Vérifie si toutes les pistes ont été notées
     if (
       Object.keys(ratings).length === tracks.length &&
       Object.keys(ratings).length > 0
@@ -49,7 +48,6 @@ function TracksList({ tracks }: TracksListProps) {
     }
   }, [ratings, tracks]);
 
-  // Mettre à jour la fonction d'enregistrement pour inclure id, nom et note
   const saveRatingsToDatabase = async () => {
     try {
       for (const trackId in ratings) {
@@ -59,7 +57,7 @@ function TracksList({ tracks }: TracksListProps) {
           trackId,
           rating,
           name,
-        ); // Ajoute le nom dans l'appel
+        );
       }
       console.log(
         'Toutes les notes ont été enregistrées dans la base de données.',
@@ -69,7 +67,6 @@ function TracksList({ tracks }: TracksListProps) {
     }
   };
 
-  // Mise à jour de renderStars pour inclure le nom dans l'appel de handleRating
   const renderStars = (trackId: string, trackName: string) => {
     const currentRating = ratings[trackId]?.rating || 0;
     return [1, 2, 3, 4, 5].map((star) => (
@@ -87,6 +84,14 @@ function TracksList({ tracks }: TracksListProps) {
     ));
   };
 
+  // Fonction pour formater la durée en "min:sec"
+  const formatDuration = (durationMs: number) => {
+    const minutes = Math.floor(durationMs / 60000);
+    const seconds = Math.floor((durationMs % 60000) / 1000);
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+    return `${minutes}:${formattedSeconds}`;
+  };
+
   if (tracks.length === 0) return null;
 
   return (
@@ -98,7 +103,7 @@ function TracksList({ tracks }: TracksListProps) {
             <AlbumIcon sx={{ color: 'white', mr: 1, my: 0.5, fontSize: 50 }} />
             <ListItemText
               primary={track.name}
-              secondary={`${(track.duration_ms / 60000).toFixed(2)} min`}
+              secondary={`${formatDuration(track.duration_ms)}`}
             />
             {renderStars(track.id, track.name)}
           </ListItem>
