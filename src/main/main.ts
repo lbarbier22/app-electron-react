@@ -2,11 +2,19 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import initializeDatabase, { db } from '../domain/database/initDatabase';
+import initializeDatabase from '../domain/database/initDatabase';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { getAllRatings, getRating, upsertRating } from '../domain/database/queries/ratingQueries';
-import { getAlbumTracks, getBearerToken, searchAlbums } from '../renderer/services/api/spotifyApi';
+import {
+  getAllRatings,
+  getRating,
+  upsertRating,
+} from '../domain/database/queries/ratingQueries';
+import {
+  getAlbumTracks,
+  getBearerToken,
+  searchAlbums,
+} from '../renderer/services/api/spotifyApi';
 
 class AppUpdater {
   constructor() {
