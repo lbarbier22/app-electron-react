@@ -1,4 +1,8 @@
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+// Charger les variables d'environnement
+dotenv.config();
 
 export async function getBearerToken() {
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -8,8 +12,8 @@ export async function getBearerToken() {
     },
     body: new URLSearchParams({
       grant_type: 'client_credentials',
-      client_id: '<DELETED>',
-      client_secret: '<DELETED>',
+      client_id: process.env.SPOTIFY_CLIENT_ID,
+      client_secret: process.env.SPOTIFY_CLIENT_SECRET,
     }),
   });
 
