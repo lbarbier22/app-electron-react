@@ -11,6 +11,7 @@ import { RatingListProps } from '../../../domain/models/rating';
 
 function TracksList({ tracks }: TracksListProps) {
   const [ratings, setRatings] = useState<RatingListProps>({});
+  const [averageRating, setAverageRating] = useState<number>(0);
 
   const handleRating = (trackId: string, trackName: string, rating: number) => {
     setRatings((prevRatings) => ({
@@ -22,10 +23,12 @@ function TracksList({ tracks }: TracksListProps) {
   // Récupère des notes dans la BDD
   useEffect(() => {
     const fetchRatingsFromDB = async () => {
-      const initialRatings: {} = {};
+      const initialRatings: RatingListProps = {};
 
       for (const track of tracks) {
-        const ratingFromBDD = await window.electronAPI.ipcRenderer.getRating(track.id);
+        const ratingFromBDD = await window.electronAPI.ipcRenderer.getRating(
+          track.id,
+        );
         if (ratingFromBDD) {
           initialRatings[track.id] = {
             name: track.name,
@@ -44,21 +47,29 @@ function TracksList({ tracks }: TracksListProps) {
       Object.keys(ratings).length === tracks.length &&
       Object.keys(ratings).length > 0
     ) {
-      saveRatingsToDatabase();
+      processEndOfRating();
     }
   }, [ratings, tracks]);
 
-  const saveRatingsToDatabase = async () => {
+  const processEndOfRating = async () => {
     try {
+      let totalRating = 0;
       for (const trackId in ratings) {
-        const { rating } = ratings[trackId];
-        const { name } = ratings[trackId];
+        const { rating, name } = ratings[trackId];
+        // Enregistrer la note dans la base de données
         await window.electronAPI.ipcRenderer.insertRating(
           trackId,
           rating,
           name,
         );
+
+        totalRating += rating;
       }
+
+      // Calculer la moyenne des notes
+      const avgRating = totalRating / tracks.length;
+      setAverageRating(avgRating);
+
       console.log(
         'Toutes les notes ont été enregistrées dans la base de données.',
       );
@@ -84,7 +95,6 @@ function TracksList({ tracks }: TracksListProps) {
     ));
   };
 
-  // Fonction pour formater la durée en "min:sec"
   const formatDuration = (durationMs: number) => {
     const minutes = Math.floor(durationMs / 60000);
     const seconds = Math.floor((durationMs % 60000) / 1000);
@@ -95,8 +105,13 @@ function TracksList({ tracks }: TracksListProps) {
   if (tracks.length === 0) return null;
 
   return (
-    <div>
+    <div ref={tracks}>
       <h2>Tracks</h2>
+      {averageRating !== null && (
+        <div className="average-rating">
+          <h3>Moyenne de l'album : {averageRating.toFixed(2)}/5</h3>
+        </div>
+      )}
       <List className="tracks">
         {tracks.map((track) => (
           <ListItem key={track.id}>
