@@ -11,21 +11,24 @@ import { RatingListProps } from '../../../domain/models/rating';
 
 function TracksList({ tracks }: TracksListProps) {
   const [ratings, setRatings] = useState<RatingListProps>({});
+  const [averageRating, setAverageRating] = useState<number>(0);
 
   const handleRating = (trackId: string, trackName: string, rating: number) => {
     setRatings((prevRatings) => ({
       ...prevRatings,
-      [trackId]: { name: trackName, rating }, // Stocke le nom et la note
+      [trackId]: { name: trackName, rating },
     }));
   };
 
   // Récupère des notes dans la BDD
   useEffect(() => {
     const fetchRatingsFromDB = async () => {
-      const initialRatings: {} = {};
+      const initialRatings: RatingListProps = {};
 
       for (const track of tracks) {
-        const ratingFromBDD = await window.electronAPI.ipcRenderer.getRating(track.id);
+        const ratingFromBDD = await window.electronAPI.ipcRenderer.getRating(
+          track.id,
+        );
         if (ratingFromBDD) {
           initialRatings[track.id] = {
             name: track.name,
@@ -40,27 +43,33 @@ function TracksList({ tracks }: TracksListProps) {
   }, [tracks]);
 
   useEffect(() => {
-    // Vérifie si toutes les pistes ont été notées
     if (
       Object.keys(ratings).length === tracks.length &&
       Object.keys(ratings).length > 0
     ) {
-      saveRatingsToDatabase();
+      processEndOfRating();
     }
   }, [ratings, tracks]);
 
-  // Mettre à jour la fonction d'enregistrement pour inclure id, nom et note
-  const saveRatingsToDatabase = async () => {
+  const processEndOfRating = async () => {
     try {
+      let totalRating = 0;
       for (const trackId in ratings) {
-        const { rating } = ratings[trackId];
-        const { name } = ratings[trackId];
+        const { rating, name } = ratings[trackId];
+        // Enregistrer la note dans la base de données
         await window.electronAPI.ipcRenderer.insertRating(
           trackId,
           rating,
           name,
-        ); // Ajoute le nom dans l'appel
+        );
+
+        totalRating += rating;
       }
+
+      // Calculer la moyenne des notes
+      const avgRating = totalRating / tracks.length;
+      setAverageRating(avgRating);
+
       console.log(
         'Toutes les notes ont été enregistrées dans la base de données.',
       );
@@ -69,7 +78,6 @@ function TracksList({ tracks }: TracksListProps) {
     }
   };
 
-  // Mise à jour de renderStars pour inclure le nom dans l'appel de handleRating
   const renderStars = (trackId: string, trackName: string) => {
     const currentRating = ratings[trackId]?.rating || 0;
     return [1, 2, 3, 4, 5].map((star) => (
@@ -87,18 +95,30 @@ function TracksList({ tracks }: TracksListProps) {
     ));
   };
 
+  const formatDuration = (durationMs: number) => {
+    const minutes = Math.floor(durationMs / 60000);
+    const seconds = Math.floor((durationMs % 60000) / 1000);
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+    return `${minutes}:${formattedSeconds}`;
+  };
+
   if (tracks.length === 0) return null;
 
   return (
     <div>
       <h2>Tracks</h2>
+      {averageRating !== null && (
+        <div className="average-rating">
+          <h3>Moyenne de l'album : {averageRating.toFixed(2)}/5</h3>
+        </div>
+      )}
       <List className="tracks">
         {tracks.map((track) => (
           <ListItem key={track.id}>
             <AlbumIcon sx={{ color: 'white', mr: 1, my: 0.5, fontSize: 50 }} />
             <ListItemText
               primary={track.name}
-              secondary={`${(track.duration_ms / 60000).toFixed(2)} min`}
+              secondary={`${formatDuration(track.duration_ms)}`}
             />
             {renderStars(track.id, track.name)}
           </ListItem>

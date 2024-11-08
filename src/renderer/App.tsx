@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.png';
 import './App.css';
 import SearchBar from './components/searchBar/SearchBar';
 import AlbumsList from './components/albumList/albumList';
 import TracksList from './components/trackList/trackList';
-import {Album} from "../domain/models/album";
-import {fetchAlbums} from "../domain/usecases/fetchAlbum";
-import {Track} from "../domain/models/track";
-import {fetchTracks} from "../domain/usecases/fetchTrack";
+import { Album } from '../domain/models/album';
+import { fetchAlbums } from '../domain/usecases/fetchAlbum';
+import { Track } from '../domain/models/track';
+import { fetchTracks } from '../domain/usecases/fetchTrack';
 
 function Hello() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Appel initial avec le mot-clé "THIS IT?"
-    handleSearch("THIS IT?");
+    handleSearch('THIS IT?');
   }, []);
 
   async function handleSearch(query: string) {
@@ -29,6 +29,13 @@ function Hello() {
     setTracks(await trackResults);
   }
 
+  useEffect(() => {
+    // Descend au bas dès que les tracks sont chargés et affichés
+    if (tracks.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [tracks]);
+
   return (
     <div>
       <div className="Hello">
@@ -37,10 +44,13 @@ function Hello() {
       <h1>RateYourFavAlbums</h1>
       <SearchBar className="search-bar" onSearch={handleSearch} />
       <AlbumsList albums={albums} onAlbumClick={handleAlbumClick} />
-      <TracksList tracks={tracks} />
+      <div ref={bottomRef}>
+        <TracksList tracks={tracks} /> {/* Composant TracksList */}
+      </div>
     </div>
   );
 }
+
 export default function App() {
   return (
     <Router>
