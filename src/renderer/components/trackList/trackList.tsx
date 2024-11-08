@@ -105,7 +105,7 @@ function TracksList({ tracks }: TracksListProps) {
   if (tracks.length === 0) return null;
 
   return (
-    <div ref={tracks}>
+    <div>
       <h2>Tracks</h2>
       {averageRating !== null && (
         <div className="average-rating">
