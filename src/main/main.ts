@@ -1,8 +1,10 @@
 import path from 'path';
-import {app, BrowserWindow, ipcMain, shell} from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import fetch from 'node-fetch'; // Assurez-vous que node-fetch est installé
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import initializeDatabase, { db } from '../domain/database/initDatabase';
+import { getAllRatings } from '../domain/usecases/operationsRating';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -15,6 +17,7 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+// eslint-disable-next-line no-use-before-define,import/no-mutable-exports
 export let bearerToken = getBearerToken(); // Stockage du bearer token
 
 const createWindow = async () => {
@@ -22,7 +25,8 @@ const createWindow = async () => {
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
 
-  const getAssetPath = (...paths: string[]): string => path.join(RESOURCES_PATH, ...paths);
+  const getAssetPath = (...paths: string[]): string =>
+    path.join(RESOURCES_PATH, ...paths);
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -65,14 +69,6 @@ app.on('window-all-closed', () => {
 
 app.whenReady().then(createWindow).catch(console.log);
 
-ipcMain.handle('search-albums', async (_, query: string) => {
-  return await searchAlbums(query);
-});
-
-ipcMain.handle('get-album-tracks', async (_, albumId: string) => {
-  return await getAlbumTracks(albumId);
-});
-
 // @ts-ignore
 async function getBearerToken() {
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -81,10 +77,10 @@ async function getBearerToken() {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      'grant_type': 'client_credentials',
-      'client_id': 'ece01d967d6642069f005d077112f7f9',
-      'client_secret': 'c408c84aa31d40b1884a07308e9adb36'
-    })
+      grant_type: 'client_credentials',
+      client_id: 'ece01d967d6642069f005d077112f7f9',
+      client_secret: 'c408c84aa31d40b1884a07308e9adb36',
+    }),
   });
 
   if (response.ok) {
@@ -92,24 +88,83 @@ async function getBearerToken() {
     // @ts-ignore
     console.log('Search results:', data.access_token);
     // @ts-ignore
-    bearerToken = data.access_token
+    bearerToken = data.access_token;
   } else {
     console.error('Search failed:', response.statusText);
   }
 }
 
+initializeDatabase().then(() => {
+  console.log('getAllRatings:', getAllRatings());
+});
+
 export async function searchAlbums(query: string) {
-  const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=3`, {
-    headers: { Authorization: `Bearer ${bearerToken}` },
-  });
+  const response = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=3`,
+    {
+      headers: { Authorization: `Bearer ${bearerToken}` },
+    },
+  );
   const data = await response.json();
   return data.albums.items;
 }
 
 export async function getAlbumTracks(albumId: string) {
-  const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
-    headers: { Authorization: `Bearer ${bearerToken}` },
-  });
+  const response = await fetch(
+    `https://api.spotify.com/v1/albums/${albumId}/tracks`,
+    {
+      headers: { Authorization: `Bearer ${bearerToken}` },
+    },
+  );
   const data = await response.json();
   return data.items;
 }
+
+ipcMain.handle('insert-rating', async (event, trackId, rating, name) => {
+  try {
+    // Vérifie si une note existe déjà pour le trackId donné
+    const existingRating = db.prepare('SELECT rating FROM ratings WHERE id = ?').get(trackId);
+
+    if (existingRating) {
+      // Si une note existe déjà, effectue une mise à jour
+      const stmt = db.prepare(
+        'UPDATE ratings SET rating = ?, name = ? WHERE id = ?'
+      );
+      stmt.run(rating, name, trackId);
+    } else {
+      // Sinon, insère une nouvelle note
+      const stmt = db.prepare(
+        'INSERT INTO ratings (id, rating, name) VALUES (?, ?, ?)'
+      );
+      stmt.run(trackId, rating, name);
+    }
+    return { success: true };
+  } catch (error) {
+    console.error(
+      'Erreur lors de l’insertion/mise à jour dans la base de données :',
+      error,
+    );
+    throw error;
+  }
+});
+
+ipcMain.handle('get-rating', (event, trackId) => {
+  try {
+    const stmt = db.prepare('SELECT rating FROM ratings WHERE id = ?');
+    return stmt.pluck().get(trackId);
+  } catch (error) {
+    console.error(
+      'Erreur lors de l’insertion dans la base de données :',
+      error,
+    );
+    throw error;
+  }
+});
+
+ipcMain.handle('search-albums', async (_, query: string) => {
+  return searchAlbums(query);
+});
+
+ipcMain.handle('get-album-tracks', async (_, albumId: string) => {
+  return getAlbumTracks(albumId);
+});

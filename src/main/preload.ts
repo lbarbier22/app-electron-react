@@ -15,6 +15,12 @@ const electronHandler = {
       ipcRenderer.on(channel, subscription);
       return () => ipcRenderer.removeListener(channel, subscription);
     },
+    insertRating: (trackId: string, rating: number, name: string) => {
+      return ipcRenderer.invoke('insert-rating', trackId, rating, name); // Ajout du retour ici
+    },
+    getRating: (trackId: string) => {
+      return ipcRenderer.invoke('get-rating', trackId);
+    },
   },
 };
 
