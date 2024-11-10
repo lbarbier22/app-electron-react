@@ -7,3 +7,8 @@ export interface Album {
   release_date: string;
   total_tracks: number;
 }
+
+export interface AlbumsListProps {
+  result: Album[];
+  onClick: (albumId: string) => void;
+}

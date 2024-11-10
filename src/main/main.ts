@@ -13,7 +13,8 @@ import {
 import {
   getAlbumTracks,
   getBearerToken,
-  searchAlbums,
+  searchAlbums, searchAlbumsByArtist,
+  searchArtists
 } from '../renderer/services/api/spotifyApi';
 
 class AppUpdater {
@@ -93,6 +94,14 @@ ipcMain.handle('get-rating', (event, trackId) => {
 
 ipcMain.handle('search-albums', async (_, query: string) => {
   return searchAlbums(query, await bearerToken);
+});
+
+ipcMain.handle('search-albums-by-artist', async (_, query: string) => {
+  return searchAlbumsByArtist(query, await bearerToken);
+});
+
+ipcMain.handle('search-artists', async (_, query: string) => {
+  return searchArtists(query, await bearerToken);
 });
 
 ipcMain.handle('get-album-tracks', async (_, albumId: string) => {
