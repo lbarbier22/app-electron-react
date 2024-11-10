@@ -1,6 +1,10 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'search-albums' | 'search-artists' | 'get-album-tracks';
+export type Channels =
+  | 'search-albums'
+  | 'search-albums-by-artist'
+  | 'search-artists'
+  | 'get-album-tracks';
 
 const electronHandler = {
   ipcRenderer: {
@@ -16,7 +20,7 @@ const electronHandler = {
       return () => ipcRenderer.removeListener(channel, subscription);
     },
     insertRating: (trackId: string, rating: number, name: string) => {
-      return ipcRenderer.invoke('insert-rating', trackId, rating, name); // Ajout du retour ici
+      return ipcRenderer.invoke('insert-rating', trackId, rating, name);
     },
     getRating: (trackId: string) => {
       return ipcRenderer.invoke('get-rating', trackId);

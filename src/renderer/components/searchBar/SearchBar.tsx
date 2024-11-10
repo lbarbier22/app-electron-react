@@ -8,7 +8,6 @@ function SearchBar({ onSearch }) {
   const [searchType, setSearchType] = useState('album');
 
   function handleSubmit(event: { preventDefault: () => void }) {
-    console.log('searchType:', searchType);
     event.preventDefault(); // Empêche le rechargement de la page
     onSearch(input, searchType);
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -29,6 +29,10 @@ function ResultList({ result, onClick, searchType }: ResultListProps) {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedResults = result.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [result]);
 
   return (
     <div>

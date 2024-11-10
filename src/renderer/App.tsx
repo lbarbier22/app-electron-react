@@ -11,6 +11,7 @@ import { Track } from '../domain/models/track';
 import { fetchTracks } from '../domain/usecases/fetchTrack';
 import { fetchArtists } from '../domain/usecases/fetchArtist';
 import { Artist } from '../domain/models/artist';
+import { fetchAlbumsByArtist } from '../domain/usecases/fetchAlbumByArtist';
 
 function Hello() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -34,9 +35,15 @@ function Hello() {
     }
   }
 
-  async function handleClick(albumId: string) {
-    const trackResults = fetchTracks(albumId);
-    setTracks(await trackResults);
+  async function handleClick(id: string, searchType: 'album' | 'artist') {
+    if (searchType === 'album') {
+      const trackResults = await fetchTracks(id);
+      setTracks(trackResults);
+    } else if (searchType === 'artist') {
+      const albumResults = await fetchAlbumsByArtist(id); // Pour récupérer les albums de l'artiste
+      setSearchType('album');
+      setResult(albumResults);
+    }
   }
 
   useEffect(() => {
@@ -53,7 +60,7 @@ function Hello() {
       </div>
       <h1>RateYourFavAlbums</h1>
       <SearchBar className="search-bar" onSearch={handleSearch} />
-      <ResultList result={result} searchType={searchType} onClick={handleClick} />
+      <ResultList result={result} searchType={searchType} onClick={(id) => handleClick(id, searchType)} />
       <div ref={bottomRef}>
         <TracksList tracks={tracks} /> {/* Composant TracksList */}
       </div>
