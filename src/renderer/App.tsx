@@ -3,28 +3,38 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.png';
 import './App.css';
 import SearchBar from './components/searchBar/SearchBar';
-import AlbumsList from './components/albumList/albumList';
+import ResultList from './components/albumList/resultList';
 import TracksList from './components/trackList/trackList';
 import { Album } from '../domain/models/album';
 import { fetchAlbums } from '../domain/usecases/fetchAlbum';
 import { Track } from '../domain/models/track';
 import { fetchTracks } from '../domain/usecases/fetchTrack';
+import { fetchArtists } from '../domain/usecases/fetchArtist';
+import { Artist } from '../domain/models/artist';
 
 function Hello() {
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [albums, setAlbums] = useState<Album[]>([]);
+  const [result, setResult] = useState<Album[] | Artist[]>([]);
+  const [searchType, setSearchType] = useState<'album' | 'artist'>('album');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    handleSearch('THIS IT?');
+    handleSearch('THIS IT?', 'album');
   }, []);
 
-  async function handleSearch(query: string) {
-    const albumResults = fetchAlbums(query);
-    setAlbums(await albumResults);
+  async function handleSearch(query: string, searchType: 'album' | 'artist') {
+    setSearchType(searchType);
+    setResult([]);
+    if (searchType === 'album') {
+      const albumResults = await fetchAlbums(query);
+      setResult(albumResults);
+    } else if (searchType === 'artist') {
+      const artistResults = await fetchArtists(query);
+      setResult(artistResults);
+    }
   }
 
-  async function handleAlbumClick(albumId: string) {
+  async function handleClick(albumId: string) {
     const trackResults = fetchTracks(albumId);
     setTracks(await trackResults);
   }
@@ -43,7 +53,7 @@ function Hello() {
       </div>
       <h1>RateYourFavAlbums</h1>
       <SearchBar className="search-bar" onSearch={handleSearch} />
-      <AlbumsList albums={albums} onAlbumClick={handleAlbumClick} />
+      <ResultList result={result} searchType={searchType} onClick={handleClick} />
       <div ref={bottomRef}>
         <TracksList tracks={tracks} /> {/* Composant TracksList */}
       </div>

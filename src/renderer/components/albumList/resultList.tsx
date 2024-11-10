@@ -7,26 +7,15 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import './albumList.css'; // Pour des styles personnalisés si nécessaire
+import './resultList.css';
+import { ResultListProps } from '../../../domain/models/result';
 
-interface Album {
-  id: string;
-  name: string;
-  images: { url: string }[];
-  artists: { name: string }[];
-}
-
-interface AlbumsListProps {
-  albums: Album[];
-  onAlbumClick: (albumId: string) => void;
-}
-
-function AlbumsList({ albums, onAlbumClick }: AlbumsListProps) {
+function ResultList({ result, onClick, searchType }: ResultListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
   const handleNextPage = () => {
-    if (currentPage * itemsPerPage < albums.length) {
+    if (currentPage * itemsPerPage < result.length) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -39,24 +28,38 @@ function AlbumsList({ albums, onAlbumClick }: AlbumsListProps) {
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedAlbums = albums.slice(startIndex, endIndex);
+  const paginatedResults = result.slice(startIndex, endIndex);
 
   return (
     <div>
-      <List className="albums">
-        {paginatedAlbums.map((album) => (
+      <List className="results">
+        {paginatedResults.map((item) => (
           <ListItem
-            key={album.id}
+            key={item.id}
             button
-            onClick={() => onAlbumClick(album.id)}
+            onClick={() => onClick(item.id)}
           >
-            <ListItemAvatar>
-              <img width="100" src={album.images[0].url} alt={album.name} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={album.name}
-              secondary={album.artists[0].name}
-            />
+            {searchType === 'album' && (
+              <>
+                <ListItemAvatar>
+                  <img width="100" src={item.images[0]?.url} alt={item.name} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={item.name}
+                  secondary={item.artists[0].name}
+                />
+              </>
+            )}
+            {searchType === 'artist' && (
+              <>
+                <ListItemAvatar>
+                  <img width="100" src={item.images[0]?.url || ''} alt={item.name} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={item.name}
+                />
+              </>
+            )}
             <Divider sx={{ color: 'white' }} />
           </ListItem>
         ))}
@@ -85,7 +88,7 @@ function AlbumsList({ albums, onAlbumClick }: AlbumsListProps) {
           </IconButton>
           <IconButton
             onClick={handleNextPage}
-            disabled={endIndex >= albums.length}
+            disabled={endIndex >= result.length}
             sx={{
               backgroundColor: 'white',
               color: 'black',
@@ -104,4 +107,4 @@ function AlbumsList({ albums, onAlbumClick }: AlbumsListProps) {
   );
 }
 
-export default AlbumsList;
+export default ResultList;

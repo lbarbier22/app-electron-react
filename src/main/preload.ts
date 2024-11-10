@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'search-albums' | 'get-album-tracks';
+export type Channels = 'search-albums' | 'search-artists' | 'get-album-tracks';
 
 const electronHandler = {
   ipcRenderer: {
