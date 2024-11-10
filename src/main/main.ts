@@ -27,6 +27,7 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
+
 // eslint-disable-next-line no-use-before-define,import/no-mutable-exports
 const bearerToken = getBearerToken(); // Stockage du bearer token
 

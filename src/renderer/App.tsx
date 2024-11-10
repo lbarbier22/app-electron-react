@@ -56,7 +56,7 @@ function Hello() {
   return (
     <div>
       <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
+        <img width="200" alt="icon" src={icon}/>
       </div>
       <h1>RateYourFavAlbums</h1>
       <SearchBar className="search-bar" onSearch={handleSearch} />
@@ -72,7 +72,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<Hello/>}/>
       </Routes>
     </Router>
   );
